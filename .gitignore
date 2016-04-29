@@ -45,3 +45,20 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.lock
+.metadata/.log
+*.gen
+.metadata/.mylyn/.taskListIndex/segments_1
+*.png
+.metadata/.plugins/com.amazonaws.eclipse.core/regions/regions.xml
+*.index
+.metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.mylyn.context.core.prefs
+*.prefs
+.metadata/.plugins/org.eclipse.m2e.logback.configuration/0.log
+*.xml
+.metadata/.plugins/org.eclipse.team.cvs.core/.running
+*.ini
+.metadata/*
+ReinforcementLearning/bin/*
+ReinforcementLearning/.project
+ReinforcementLearning/.classpath
