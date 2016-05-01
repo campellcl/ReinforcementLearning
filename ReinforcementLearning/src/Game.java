@@ -70,7 +70,9 @@ public class Game
             GridWorld.createRandomGridWorld(10, 10, 0, 2, 10, 1, 1.0);
         MarkovDecisionProcess mdp =
             new MarkovDecisionProcess(new Scanner(world));
-        Player p = new HumanPlayer("Player1");
+        //Player p = new HumanPlayer("Player1");
+        //Game game = new Game(mdp, p);
+        ValueIterationPlayer p = new ValueIterationPlayer("MDP:Chris");
         Game game = new Game(mdp, p);
         double score = game.play();
         GridWorld.display(mdp.getStates(), mdp.getCurrent());
