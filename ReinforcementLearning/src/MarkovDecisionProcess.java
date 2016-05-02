@@ -18,7 +18,9 @@ public class MarkovDecisionProcess implements Cloneable
     private double[][][] transProbs;
     private double gamma;
     private double[][] actionUncertainty;
-
+    //MyCode: 
+    private int grid_row_dim;
+    
     /**
      * Constructor reads the parameters from a scanner.
      * 
