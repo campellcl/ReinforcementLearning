@@ -18,6 +18,9 @@ import java.util.TreeMap;
  */
 public class ValueIterationPlayer extends Player
 {
+	private boolean calculated_optimal_policy = false;
+	private boolean calculated_state_utilities = false;
+	private boolean state_information_initialized = false;
     /**
      * The constructor takes the name.
      * 
@@ -50,7 +53,7 @@ public class ValueIterationPlayer extends Player
 	}
 	
 	/**
-	 * Returns a HashMap of neighboring states with their associated expected discount utility.
+	 * Returns a Set of states that are adjacent to the provided state. 
 	 * @param start_state -The state from which to determine adjacent neighbors. 
 	 * @param mdp -The Markov Decision Process.
 	 * @return neighbors -A HashMap<State,Double> of state's and their expected discount utility-
@@ -63,7 +66,8 @@ public class ValueIterationPlayer extends Player
 			for (String dir : mdp.getActions()) {
 				double trans_prob = mdp.transProb(start_state, dir, state);
 				if (trans_prob > 0.0) {
-					if (!neighbors.contains(state) && !state.equals(start_state)) {
+					//if (!neighbors.contains(state) && !state.equals(start_state)) {
+					if (!neighbors.contains(state)) {
 						neighbors.add(state);
 					}
 				}
@@ -89,11 +93,12 @@ public class ValueIterationPlayer extends Player
 			double EDU = 0.0;
 			for (State neighbor : getNeighboringStates(state, mdp)) {
 				EDU += (utility.get(neighbor) * mdp.transProb(state, dir, neighbor));
+				//EDU += utility.get(neighbor);
 			}
 			expected_discount_utility.put(dir, EDU);
 		}
-		//return the state's utility as defined in AIMA:17.2.1
-		state_utility = Collections.max(expected_discount_utility.values()) + state.reward() + mdp.getGamma();
+		//return the state's utility as defined in AIMA: 17.2.1
+		state_utility = (Collections.max(expected_discount_utility.values()) * mdp.getGamma()) + state.reward();
 		return state_utility;
 	}
 	
@@ -103,7 +108,9 @@ public class ValueIterationPlayer extends Player
 	 */
 	private void calculateGlobalUtility(MarkovDecisionProcess mdp) {
 		for (State state : mdp.getStates()) {
+			//GridWorld.display(mdp.getStates(), mdp.getCurrent(), utility);
 			utility.replace(state, getStateUtility(state,mdp));
+			//GridWorld.display(mdp.getStates(), mdp.getCurrent(), utility);
 		}
 	}
 
@@ -118,7 +125,7 @@ public class ValueIterationPlayer extends Player
 		//Add every state to utility and policy data structures.
 		//Initialize the utility of state to be 0.0, and the policy to null:
 		for (State state : mdp.getStates()) {
-			//Given state s, U(s) = 0.0. 
+			//Given a state s, U(s) = 0.0. 
 			utility.put(state, 0.0);
 			policy.put(state, null);
 		}
@@ -132,7 +139,7 @@ public class ValueIterationPlayer extends Player
      */
     private State getOptimalNeighbor(State state, MarkovDecisionProcess mdp) {
     	Set<State> neighbors = getNeighboringStates(state, mdp);
-    	double max_utility = 0.0;
+    	double max_utility = Double.MIN_VALUE;
     	double neighbor_utility;
     	State best_neighbor = null;
     	for (State neighbor : neighbors) {
@@ -204,21 +211,28 @@ public class ValueIterationPlayer extends Player
         double utility_delta = 0.0;
         double termination_coefficient = EPS * ((1 - mdp.getGamma())/mdp.getGamma());
         HashMap<State,Double> backup;
-        boolean calculated_optimal_policy = false;
-        
-        //GridWorld.display(mdp.getStates(), mdp.getCurrent());
-        initializeStateInformation(mdp);
-        do {
-        	backup = new HashMap<State,Double>(utility);
-        	calculateGlobalUtility(mdp);
-        	utility_delta = getUtilityDelta(backup);
-        } while (utility_delta > termination_coefficient);
+        if (!state_information_initialized) {
+        	initializeStateInformation(mdp);
+        	state_information_initialized = true;
+        }
+        if (!calculated_state_utilities) {
+	        do {
+	        	//GridWorld.display(mdp.getStates(), mdp.getCurrent(), utility);
+	        	backup = new HashMap<State,Double>(utility);
+	        	calculateGlobalUtility(mdp);
+	        	utility_delta = getUtilityDelta(backup);
+	        	System.out.format("Utility Delta At %f approaching termination coefficent: %f\n", utility_delta, termination_coefficient);
+	        } while (utility_delta > termination_coefficient);
+	        calculated_state_utilities = true;
+        }
     	//System.out.println("Utility Calculated Successfully. Convergence Criterion Successful.");
     	//TODO: How to stop re-calculating the optimal policy?
     	if (!calculated_optimal_policy) {
     		calculateGlobalPolicy(mdp);
     		calculated_optimal_policy = true;
     	}
+    	GridWorld.display(mdp.getStates(), mdp.getCurrent(), utility);
+    	GridWorld.display(mdp.getStates(), mdp.getCurrent(), policy);
     	// if the utility hasn't been computed yet
         // use value iteration to compute the utility of each state.
         // use the utility to determine the optimal policy.
