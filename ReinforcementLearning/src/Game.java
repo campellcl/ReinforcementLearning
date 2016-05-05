@@ -65,9 +65,10 @@ public class Game
      *            not used.
      */
     public static void main(String[] args)
-    {
+    {	
         String world =
             GridWorld.createRandomGridWorld(10, 10, 0, 2, 10, 1, 1.0);
+        
         MarkovDecisionProcess mdp =
             new MarkovDecisionProcess(new Scanner(world));
         //Player p = new HumanPlayer("Player1");
